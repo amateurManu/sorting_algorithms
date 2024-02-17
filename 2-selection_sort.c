@@ -1,7 +1,7 @@
 #include "sort.h"
 
 /**
- * selection_sort - sorts an array of integers in 
+ * selection_sort - sorts an array of integers in
  * ascending order using the Selection sort
  *
  * @array: input of array integers
@@ -23,7 +23,7 @@ void selection_sort(int *array, size_t size)
 				k = j;
 		}
 
-		if (1 != k)
+		if (i != k)
 		{
 			tmp = array[i];
 			array[i] = array[k];
