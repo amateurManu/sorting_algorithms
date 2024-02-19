@@ -1,84 +1,127 @@
 #include "sort.h"
-#include <stdio.h>
+
 /**
- * swap_nums - swaps numbers
+ * swap - swaps 2 location in a list.
+ * @array: int pointer to the array.
+ * @a: first location of array to be swapped.
+ * @b: second location of array to be swapped.
  *
- * @arr: input array
- * @a: first index
- * @b: second index
- * Return: no return
+ * Return: void.
  */
-void swap_nums(int *arr, int a, int b)
+void swap(int a, int b, int *array)
 {
-	arr[a] = arr[a] + arr[b];
-	arr[b] = arr[a] - arr[b];
-	arr[a] = arr[a] - arr[b];
+	int temp;
+
+	temp = array[a];
+	array[a] = array[b];
+	array[b] = temp;
 }
 
 /**
- * recursion_heap - recursion that builds the max heap tree
+ * make_heap - transforms the array into a heap using the
+ * siftdown method.
+ * @array: the array to be transformed.
+ * @size: size of the array.
+ * @idx: index of the parent being checked.
  *
- * @arr: input array
- * @i: index number
- * @size: size of the array
- * @limit: limit of the array
- * Return: no return
+ * Return: void.
  */
-void recursion_heap(int *arr, int i, size_t size, int limit)
+void make_heap(int *array, int size, int idx)
 {
-	int bigger;
-	int i2;
+	int i = idx, leftchild, rightchild, maxidx;
 
-	i2 = i * 2;
+	leftchild = (i * 2) + 1;
+	rightchild = (i * 2) + 2;
 
-	if (i2 + 2 < limit)
-	{
-		recursion_heap(arr, i2 + 1, size, limit);
-		recursion_heap(arr, i2 + 2, size, limit);
-	}
+	if (leftchild < (int)size && rightchild < (int)size)
+		maxidx = array[rightchild] > array[leftchild]
+			? rightchild : leftchild; /*if both children are found*/
 
-	if (i2 + 1 >= limit)
+	else if (leftchild < (int)size && rightchild >= (int)size)
+		maxidx = leftchild; /* if only left child is found */
+
+	else			/* base case */
 		return;
 
-	if (i2 + 2 < limit)
-		bigger = (arr[i2 + 1] > arr[i2 + 2]) ? (i2 + 1) : (i2 + 2);
-	else
-		bigger = i2 + 1;
-
-	if (arr[i] < arr[bigger])
+	if (array[maxidx] > array[i]) /* swaps parent with biggest child :') */
 	{
-		swap_nums(arr, i, bigger);
-		print_array(arr, size);
-		recursion_heap(arr, bigger, size, limit);
+		swap(maxidx, i, array);
+		print_array(array, size);
+		make_heap(array, size, maxidx); /* Recursive call */
 	}
 }
 
 /**
- * heap_sort - sorts an array of integers in ascending
- * order using the Heap sort algorithm
+ * sift_down - re-heapifies an array after deleting an
+ * element from the heap.
+ * @array: the array to be reheapified.
+ * @size: the size of the array.
+ * @idx: the index where we'll stop the heapifying process.
  *
- * @array: input array
- * @size: size of the array
+ * Return: void.
+ */
+void sift_down(int *array, int size, int idx)
+{
+	int swapflag = 1, parent = 0, rightchild, leftchild;
+
+	while (swapflag)
+	{
+		swapflag = 0;
+		leftchild = (2 * parent) + 1;
+		rightchild = (2 * parent) + 2;
+		if (leftchild < idx && rightchild < idx)
+		{
+			if (array[leftchild] > array[rightchild] &&
+			    array[leftchild] > array[parent])
+			{
+				swap(parent, leftchild, array);
+				print_array(array, size);
+				parent = leftchild;
+				swapflag = 1;
+			}
+			else if (array[rightchild] > array[leftchild] &&
+				 array[rightchild] > array[parent])
+			{
+				swap(parent, rightchild, array);
+				print_array(array, size);
+				parent = rightchild;
+				swapflag = 1;
+			}
+		}
+		else if (leftchild < idx && rightchild >= idx)
+		{
+			if (array[leftchild] > array[parent])
+			{
+				swap(parent, leftchild, array);
+				print_array(array, size);
+				parent = leftchild;
+				swapflag = 1;
+			}
+		}
+	}
+}
+
+/**
+ * heap_sort - sorts an array by creating a heap out of an array
+ * then deleting elements from the heap which leaves a sorted array
+ * behind.
+ * @array: int pointer to the array being sorted.
+ * @size: the size of the array.
+ *
+ * Return: void.
  */
 void heap_sort(int *array, size_t size)
 {
 	int i;
-	size_t limit;
 
-	if (!array || size == 0)
+	if (array == NULL || size < 2)
 		return;
-
-	i = 0;
-	limit = size;
-
-	while (limit > 1)
+	for (i = (int)size - 1; i >= 0; i--)
+		make_heap(array, size, i);
+	for (i = (int)size - 1; i > 0; i--)
 	{
-		recursion_heap(array, i, size, limit);
-		if (array[i] >= array[limit - 1])
-		{
-			swap_nums(array, i, limit - 1);
-			print_array(array, size);
-		}
-		limit--;
+		swap(i, 0, array);
+		print_array(array, size);
+		sift_down(array, size, i);
 	}
 }
